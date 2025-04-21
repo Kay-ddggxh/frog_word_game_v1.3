@@ -57,8 +57,73 @@ function drawGameAreas() {
     ctx.fillRect(columnWidth * 2, 0, columnWidth, canvas.height);
 }
 
+// Global variables for animation
+let isAnimating = false; // To prevent multiple animations at the same time
+let frogX = columnWidth / 2 - 25; // Initial horizontal position of the frog
+let frogY = 50 + 3 * 50 + 10; // Initial vertical position of the frog (below the words)
+const lilyPadX = columnWidth + columnWidth / 2 - 75; // Horizontal position of the lily pad
+const lilyPadY = frogY; // Vertical position of the lily pad
+const grassX = columnWidth * 2 + columnWidth / 2 - 25; // Horizontal position of the grass area
+let sandWords = []; // Global variable for words in the sand column
+let grassWords = []; // Global variable for words in the grass column
+
+// Function to animate the frog
+function animateFrog(startX, startY, endX, endY, jumpHeight, duration, callback) {
+    if (isAnimating) return; // Prevent multiple animations
+    isAnimating = true;
+
+    const startTime = performance.now(); // Start time of the animation
+
+    function step(currentTime) {
+        const elapsedTime = currentTime - startTime; // Time elapsed since the animation started
+        const progress = Math.min(elapsedTime / duration, 1); // Progress of the animation (0 to 1)
+
+        // Update the frog's position
+        frogX = startX + (endX - startX) * progress; // Linear horizontal movement
+        frogY = startY + (endY - startY) * progress - jumpHeight * Math.sin(Math.PI * progress); // Parabolic vertical movement
+
+        // Redraw the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        drawGameAreas(); // Redraw the game areas
+        drawWords(); // Redraw the words
+        ctx.drawImage(frogImage, frogX, frogY, 50, 50); // Draw the frog
+        ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150); // Draw the lily pad
+
+        // Continue the animation or stop if complete
+        if (progress < 1) {
+            requestAnimationFrame(step); // Continue the animation
+        } else {
+            isAnimating = false; // Animation complete
+            if (callback) callback(); // Execute the callback function if provided
+        }
+    }
+
+    requestAnimationFrame(step); // Start the animation
+}
+
+// Function to handle the frog falling off the lily pad
+function fallOffLilyPad() {
+    const startX = lilyPadX + 75 - 25; // Center of the lily pad
+    const startY = lilyPadY; // Current vertical position of the frog
+    const endY = canvas.height; // Bottom edge of the canvas
+
+    animateFrog(startX, startY, startX, endY, 0, 1000, () => {
+        // Frog has fallen off and disappeared
+        console.log("Frog fell off the lily pad!");
+    });
+}
+
+// Function to draw the frog and lily pad
+function drawFrogAndLilyPad() {
+    // Draw the frog
+    ctx.drawImage(frogImage, frogX, frogY, 50, 50);
+
+    // Draw the lily pad
+    ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150);
+}
+
 // Function to draw words in the canvas
-function drawWords(sandWords, grassWords) {
+function drawWords() {
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
@@ -77,15 +142,8 @@ function drawWords(sandWords, grassWords) {
         ctx.fillText(word, x, y);
     });
 
-    // Draw the frog sprite below the words in the sand column
-    const frogX = columnWidth / 2 - 25; // Center the frog horizontally in the sand column
-    const frogY = 50 + sandWords.length * 50 + 10; // Position below the last word
-    ctx.drawImage(frogImage, frogX, frogY, 50, 50); // Draw the frog (50x50 size)
-
-    // Draw the lily pad in the river area at the same horizontal level as the frog
-    const lilyPadX = columnWidth + columnWidth / 2 - 75; // Center the lily pad in the river column
-    const lilyPadY = frogY - 50; // Same vertical position as the frog
-    ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150); // Draw the lily pad (150x150 size)
+    // Draw the frog and lily pad
+    drawFrogAndLilyPad();
 }
 
 // Function to generate random words for the columns
@@ -120,15 +178,15 @@ function generateColumns() {
     }
 
     // Randomly position the clue words among the mis-directs
-    const sandWords = [...selectedMisDirects.slice(0, 2), clueWords[0]];
-    const grassWords = [...selectedMisDirects.slice(2), clueWords[1]];
+    sandWords = [...selectedMisDirects.slice(0, 2), clueWords[0]]; // Assign to global variable
+    grassWords = [...selectedMisDirects.slice(2), clueWords[1]]; // Assign to global variable
 
     // Shuffle the words in each column
     shuffleArray(sandWords);
     shuffleArray(grassWords);
 
     // Draw the words and the frog in the canvas
-    drawWords(sandWords, grassWords);
+    drawWords();
 }
 
 // Event listener for form submission
@@ -139,12 +197,19 @@ document.getElementById("word-form").addEventListener("submit", function (event)
     // Use the solution word from the currently displayed clue
     const solutionWord = currentClue.solution;
 
-    // Check if the user's input matches the solution word
-    if (userInput.toLowerCase() === solutionWord.toLowerCase()) {
-        alert("Correct! You solved the puzzle.");
-    } else {
-        alert("Incorrect. Try again!");
-    }
+    // First jump: Sand to Lily Pad
+    animateFrog(frogX, frogY, lilyPadX + 75 - 25, lilyPadY, 50, 1000, () => {
+        // Check the user's input after the first jump
+        if (userInput.toLowerCase() === solutionWord.toLowerCase()) {
+            // Correct input: Jump to the grass area
+            animateFrog(lilyPadX + 75 - 25, lilyPadY, grassX, frogY, 50, 1000, () => {
+                console.log("Frog successfully jumped to the grass!");
+            });
+        } else {
+            // Incorrect input: Fall off the lily pad
+            fallOffLilyPad();
+        }
+    });
 
     // Clear the input field
     document.getElementById("word-input").value = "";

@@ -1,3 +1,80 @@
+/* General container styling */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Game canvas styling */
+#game-canvas {
+    border: 2px solid black;
+    margin-bottom: 20px;
+}
+
+/* Columns layout */
+.columns {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+/* Individual column styling */
 .column {
-    display: inline-block;
+    width: 200px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    border: 1px solid black;
+    position: relative;
+}
+
+.sand {
+    background-color: #d2b48c; /* Light brown */
+}
+
+.river {
+    background-color: #87ceeb; /* Blue */
+}
+
+.grass {
+    background-color: #32cd32; /* Green */
+}
+
+/* Frog sprite styling */
+.frog-container {
+    position: absolute;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+#frog {
+    width: 50px;
+    height: auto;
+}
+
+/* Play Again button styling */
+.play-again-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#play-again-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#play-again-button:hover {
+    background-color: #45a049;
 }

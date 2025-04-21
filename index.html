@@ -8,24 +8,19 @@
 </head>
 <body>
     <div class="container">
-        <!-- Left Column -->
-        <div class="column left-column"></div>
+        <!-- Game Canvas -->
+        <canvas id="game-canvas" width="800" height="400"></canvas>
 
-        <!-- Middle Column -->
-        <div class="column middle-column">
-            <form id="word-form" autocomplete="off">
-                <input type="text" id="word-input" placeholder="Enter a word" />
-                <button type="submit">Submit</button>
-            </form>
+        <!-- Form for user input -->
+        <form id="word-form" autocomplete="off">
+            <input type="text" id="word-input" placeholder="Enter a word" />
+            <button type="submit">Submit</button>
+        </form>
+
+        <!-- Play Again Button -->
+        <div class="play-again-container">
+            <button id="play-again-button">Play Again</button>
         </div>
-
-        <!-- Right Column -->
-        <div class="column right-column"></div>
-    </div>
-
-    <!-- Play Again Button -->
-    <div class="play-again-container">
-        <button id="play-again-button">Play Again</button>
     </div>
 
     <script src="assets/js/script.js"></script>

@@ -1,9 +1,4 @@
 // Object for clue word pairs and their solution
-/**
- * An array of objects representing clues and their corresponding solution.
- * Each object contains two clues and a solution that connects them.
- *
- */
 const cluesAndSolutions = [
   { clue1: "Cup", clue2: "Game", solution: "Board" },
   { clue1: "Rain", clue2: "Rack", solution: "Coat" },
@@ -25,17 +20,55 @@ const misDirects = [
   "Lamp",
 ];
 
-// Global variable to store the currently displayed clue
+// Global variables
 let currentClue = null;
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+const columnWidth = canvas.width / 3;
+
+// Function to draw the game areas (sand, river, grass)
+function drawGameAreas() {
+    // Sand area
+    ctx.fillStyle = "#d2b48c"; // Light brown
+    ctx.fillRect(0, 0, columnWidth, canvas.height);
+
+    // River area
+    ctx.fillStyle = "#87ceeb"; // Blue
+    ctx.fillRect(columnWidth, 0, columnWidth, canvas.height);
+
+    // Grass area
+    ctx.fillStyle = "#32cd32"; // Green
+    ctx.fillRect(columnWidth * 2, 0, columnWidth, canvas.height);
+}
+
+// Function to draw words in the canvas
+function drawWords(sandWords, grassWords) {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+
+    // Draw words in the sand column
+    sandWords.forEach((word, index) => {
+        const x = columnWidth / 2; // Center of the sand column
+        const y = 50 + index * 50; // Spacing between words
+        ctx.fillText(word, x, y);
+    });
+
+    // Draw words in the grass column
+    grassWords.forEach((word, index) => {
+        const x = columnWidth * 2.5; // Center of the grass column
+        const y = 50 + index * 50; // Spacing between words
+        ctx.fillText(word, x, y);
+    });
+}
 
 // Function to generate random words for the columns
 function generateColumns() {
-    const leftColumn = document.querySelector(".left-column");
-    const rightColumn = document.querySelector(".right-column");
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Clear existing content
-    leftColumn.innerHTML = "";
-    rightColumn.innerHTML = "";
+    // Draw the game areas
+    drawGameAreas();
 
     // Randomly select a clue pair from the array
     const randomClueIndex = Math.floor(Math.random() * cluesAndSolutions.length);
@@ -61,25 +94,15 @@ function generateColumns() {
     }
 
     // Randomly position the clue words among the mis-directs
-    const leftWords = [...selectedMisDirects.slice(0, 2), clueWords[0]];
-    const rightWords = [...selectedMisDirects.slice(2), clueWords[1]];
+    const sandWords = [...selectedMisDirects.slice(0, 2), clueWords[0]];
+    const grassWords = [...selectedMisDirects.slice(2), clueWords[1]];
 
     // Shuffle the words in each column
-    shuffleArray(leftWords);
-    shuffleArray(rightWords);
+    shuffleArray(sandWords);
+    shuffleArray(grassWords);
 
-    // Display the words in the columns
-    leftWords.forEach((word) => {
-        const p = document.createElement("p");
-        p.textContent = word;
-        leftColumn.appendChild(p);
-    });
-
-    rightWords.forEach((word) => {
-        const p = document.createElement("p");
-        p.textContent = word;
-        rightColumn.appendChild(p);
-    });
+    // Draw the words in the canvas
+    drawWords(sandWords, grassWords);
 }
 
 // Event listener for form submission

@@ -26,6 +26,22 @@ const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 const columnWidth = canvas.width / 3;
 
+// Load the frog sprite
+const frogImage = new Image();
+frogImage.src = "assets/images/froggy.png"; // Path to the frog sprite
+
+// Load the lily pad sprite
+const lilyPadImage = new Image();
+lilyPadImage.src = "assets/images/lily-pad.png"; // Path to the lily pad sprite
+
+// Ensure the frog and lily pad images are loaded before drawing
+frogImage.onload = function () {
+    lilyPadImage.onload = function () {
+        // Initialize the columns on page load
+        generateColumns();
+    };
+};
+
 // Function to draw the game areas (sand, river, grass)
 function drawGameAreas() {
     // Sand area
@@ -60,6 +76,16 @@ function drawWords(sandWords, grassWords) {
         const y = 50 + index * 50; // Spacing between words
         ctx.fillText(word, x, y);
     });
+
+    // Draw the frog sprite below the words in the sand column
+    const frogX = columnWidth / 2 - 25; // Center the frog horizontally in the sand column
+    const frogY = 50 + sandWords.length * 50 + 10; // Position below the last word
+    ctx.drawImage(frogImage, frogX, frogY, 50, 50); // Draw the frog (50x50 size)
+
+    // Draw the lily pad in the river area at the same horizontal level as the frog
+    const lilyPadX = columnWidth + columnWidth / 2 - 75; // Center the lily pad in the river column
+    const lilyPadY = frogY - 50; // Same vertical position as the frog
+    ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150); // Draw the lily pad (150x150 size)
 }
 
 // Function to generate random words for the columns
@@ -101,7 +127,7 @@ function generateColumns() {
     shuffleArray(sandWords);
     shuffleArray(grassWords);
 
-    // Draw the words in the canvas
+    // Draw the words and the frog in the canvas
     drawWords(sandWords, grassWords);
 }
 
@@ -136,6 +162,3 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
-
-// Initialize the columns on page load
-generateColumns();

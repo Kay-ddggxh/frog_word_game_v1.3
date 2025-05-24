@@ -86,8 +86,7 @@ function animateFrog(startX, startY, endX, endY, jumpHeight, duration, callback)
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
         drawGameAreas(); // Redraw the game areas
         drawWords(); // Redraw the words
-        ctx.drawImage(frogImage, frogX, frogY, 50, 50); // Draw the frog
-        ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150); // Draw the lily pad
+        drawFrogAndLilyPad(); // Ensure the frog is drawn after the lily pad
 
         // Continue the animation or stop if complete
         if (progress < 1) {
@@ -115,11 +114,11 @@ function fallOffLilyPad() {
 
 // Function to draw the frog and lily pad
 function drawFrogAndLilyPad() {
-    // Draw the frog
-    ctx.drawImage(frogImage, frogX, frogY, 50, 50);
-
-    // Draw the lily pad
+    // Draw the lily pad first
     ctx.drawImage(lilyPadImage, lilyPadX, lilyPadY, 150, 150);
+
+    // Draw the frog on top of the lily pad
+    ctx.drawImage(frogImage, frogX, frogY, 50, 50);
 }
 
 // Function to draw words in the canvas

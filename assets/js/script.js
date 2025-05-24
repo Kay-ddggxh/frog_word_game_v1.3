@@ -60,9 +60,9 @@ function drawGameAreas() {
 // Global variables for animation
 let isAnimating = false; // To prevent multiple animations at the same time
 let frogX = columnWidth / 2 - 25; // Initial horizontal position of the frog
-let frogY = 50 + 3 * 50 + 10; // Initial vertical position of the frog (below the words)
+let frogY = 50 + 3 * 50 + 40; // Initial vertical position of the frog
 const lilyPadX = columnWidth + columnWidth / 2 - 75; // Horizontal position of the lily pad
-const lilyPadY = frogY; // Vertical position of the lily pad
+let lilyPadY = frogY - 40; // Vertical position of the lily pad (changed from const to let)
 const grassX = columnWidth * 2 + columnWidth / 2 - 25; // Horizontal position of the grass area
 let sandWords = []; // Global variable for words in the sand column
 let grassWords = []; // Global variable for words in the grass column
@@ -188,6 +188,48 @@ function generateColumns() {
     drawWords();
 }
 
+// Function to animate the lily pad bounce
+function animateLilyPadBounce(callback) {
+    const originalY = lilyPadY; // Store the original position of the lily pad
+    const bounceDistance = 10; // Distance the lily pad moves down
+    const duration = 300; // Duration of the bounce animation in milliseconds
+    const startTime = performance.now(); // Start time of the animation
+
+    function step(currentTime) {
+        const elapsedTime = currentTime - startTime; // Time elapsed since the animation started
+        const progress = Math.min(elapsedTime / duration, 1); // Progress of the animation (0 to 1)
+
+        // Calculate the current position of the lily pad
+        if (progress <= 0.5) {
+            // Move the lily pad down during the first half of the animation
+            lilyPadY = originalY + bounceDistance * (progress * 2);
+        } else {
+            // Move the lily pad back up during the second half of the animation
+            lilyPadY = originalY + bounceDistance * (1 - (progress - 0.5) * 2);
+        }
+
+        // Redraw the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        drawGameAreas(); // Redraw the game areas
+        drawWords(); // Redraw the words
+        drawFrogAndLilyPad(); // Ensure the frog and lily pad are redrawn
+
+        // Continue the animation or stop if complete
+        if (progress < 1) {
+            requestAnimationFrame(step); // Continue the animation
+        } else {
+            lilyPadY = originalY; // Reset the lily pad to its original position
+            console.log("Lily pad bounce complete."); // Debug log
+            if (callback) {
+                console.log("Executing callback after lily pad bounce."); // Debug log
+                callback(); // Execute the callback function if provided
+            }
+        }
+    }
+
+    requestAnimationFrame(step); // Start the animation
+}
+
 // Event listener for form submission
 document.getElementById("word-form").addEventListener("submit", function (event) {
     event.preventDefault();
@@ -197,15 +239,21 @@ document.getElementById("word-form").addEventListener("submit", function (event)
     const solutionWord = currentClue.solution;
 
     // First jump: Sand to Lily Pad
-    animateFrog(frogX, frogY, lilyPadX + 75 - 25, lilyPadY, 50, 1000, () => {
+    animateFrog(frogX, frogY, lilyPadX + 75 - 25, frogY, 50, 1000, () => {
+        console.log("Frog landed on the lily pad."); // Debug log
+
         // Check the user's input after the first jump
         if (userInput.toLowerCase() === solutionWord.toLowerCase()) {
-            // Correct input: Jump to the grass area
-            animateFrog(lilyPadX + 75 - 25, lilyPadY, grassX, frogY, 50, 1000, () => {
-                console.log("Frog successfully jumped to the grass!");
+            // Correct input: Bounce the lily pad, then jump to the grass area
+            animateLilyPadBounce(() => {
+                console.log("Lily pad bounce finished. Frog jumping to the grass."); // Debug log
+                animateFrog(lilyPadX + 75 - 25, frogY, grassX, frogY, 50, 1000, () => {
+                    console.log("Frog successfully jumped to the grass!"); // Debug log
+                });
             });
         } else {
             // Incorrect input: Fall off the lily pad
+            console.log("Incorrect input. Frog falling off the lily pad."); // Debug log
             fallOffLilyPad();
         }
     });
